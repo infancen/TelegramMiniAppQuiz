@@ -1,194 +1,112 @@
-const quizData = [
-    {
-        question: "Какой язык программирования используется для веб-разработки?",
-        options: ["Java", "Python", "JavaScript", "C++"],
-        answer: "JavaScript"
-    },
-    {
-        question: "Какой тег используется для создания ссылки в HTML?",
-        options: ["<a>", "<link>", "<href>", "<url>"],
-        answer: "<a>"
-    },
-    {
-        question: "Какой фреймворк используется для создания пользовательских интерфейсов?",
-        options: ["Django", "Flask", "React", "Express"],
-        answer: "React"
-    }
-];
+let questions = [];
+fetch('questions.json')
+    .then(response => response.json())
+    .then(data => {
+        questions = data;
+        console.log('Словарь с буквами загружен');
+    })
+    .catch(error => console.error('Ошибка при загрузке словаря:', error));
 
-let currentQuestionIndex = 0;
-let correctAnswers = 0;
-let incorrectAnswers = 0;
-let lastAnswer = null; // Храним последний ответ
+let score = { correct: 0, incorrect: 0 };
+let mode = "closed";
+let lastQuestionIndex = -1;
+let selectedCategory = "Все звуки";
+let currentQuestion = null;
 
-const openTestButton = document.getElementById('open-test');
-const closedTestButton = document.getElementById('closed-test');
-const quizContainer = document.getElementById('quiz-container');
-const questionsDiv = document.getElementById('questions');
-const submitButton = document.getElementById('submit');
-const resultsDiv = document.getElementById('results');
-const scoreDisplay = document.getElementById('score');
-const restartButton = document.getElementById('restart');
-const feedbackDiv = document.getElementById('feedback');
-
-openTestButton.addEventListener('click', () => {
-    startQuiz('open');
-});
-
-closedTestButton.addEventListener('click', () => {
-    startQuiz('closed');
-});
-
-function startQuiz(type) {
-    document.querySelector('.container').classList.add('hidden'); // Скрываем контейнер с кнопками
-    quizContainer.classList.remove('hidden'); // Показываем контейнер с вопросами
-    document.getElementById('quiz-title').textContent = type === 'open' ? 'Открытый тест' : 'Закрытый тест';
-    loadQuestions(type);
+function startTest() {
+    selectedCategory = document.getElementById("categorySelect").value;
+    mode = document.querySelector('input[name="modeSelect"]:checked').value;
+    document.getElementById("setupScreen").style.display = "none";
+    document.getElementById("testContainer").style.display = "block";
+    loadQuestion();
 }
 
-function loadQuestions(type) {
-    questionsDiv.innerHTML = '';
-    if (type === 'open') {
-        quizData.forEach((question, index) => {
-            const questionDiv = document.createElement('div');
-            questionDiv.innerHTML = `
-                <p><strong>Вопрос ${index + 1}:</strong> ${escapeHtml(question.question)}</p>
-                <input type="text" id="answer${index}" placeholder="Введите ваш ответ">
-            `;
-            questionsDiv.appendChild(questionDiv);
-        });
-    } else {
-        showQuestion(currentQuestionIndex); // Показываем первый вопрос для закрытого теста
+function endTest() {
+    alert(`Тест завершён!\nПравильных ответов: ${score.correct}\nОшибок: ${score.incorrect}`);
+    location.reload();
+}
+
+function getFilteredQuestions() {
+    return questions.filter(q => selectedCategory === "Все звуки" || q.categories.includes(selectedCategory));
+}
+
+function getRandomQuestion() {
+    let filteredQuestions = getFilteredQuestions();
+    let nextQuestionIndex;
+    do {
+        nextQuestionIndex = Math.floor(Math.random() * filteredQuestions.length);
+    } while (nextQuestionIndex === lastQuestionIndex && filteredQuestions.length > 1);
+    lastQuestionIndex = nextQuestionIndex;
+    return filteredQuestions[nextQuestionIndex];
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
     }
 }
 
-function showQuestion(index) {
-    questionsDiv.innerHTML = ''; // Очищаем контейнер с вопросами
-    const question = quizData[index]; // Получаем текущий вопрос
+function loadQuestion() {
+    const nextButton = document.getElementById("nextQuestion");
+    nextButton.style.display = "none"; // Скрываем кнопку "Пропустить" перед загрузкой следующего вопроса
 
-    // Создаем HTML для вопроса
-    const questionDiv = document.createElement('div');
-    questionDiv.innerHTML = `
-        <p><strong>Вопрос ${index + 1}:</strong> ${escapeHtml(question.question)}</p>
-        ${question.options.map((option, i) => `
-            <label>
-                <input type="radio" name="question${index}" value="${escapeHtml(option)}">
-                ${escapeHtml(option)}
-            </label><br>
-        `).join('')}
-    `;
-    questionsDiv.appendChild(questionDiv);
+    setTimeout(() => {
+        currentQuestion = getRandomQuestion();  // Сохраняем текущий вопрос
+        document.getElementById("question").textContent = currentQuestion.char; // Отображаем вопрос
 
-    // Добавляем кнопку "Следующий вопрос", если это не последний вопрос
-    if (index < quizData.length - 1) {
-        const nextButton = document.createElement('button');
-        nextButton.textContent = 'Следующий вопрос';
-        nextButton.addEventListener('click', () => {
-            const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-            if (selectedOption) {
-                const isCorrect = selectedOption.value === quizData[index].answer;
-                if (isCorrect) {
-                    correctAnswers++;
-                } else {
-                    incorrectAnswers++;
-                }
-                showFeedback(isCorrect, selectedOption.value, quizData[index].answer);
-            } else {
-                incorrectAnswers++;
-                showFeedback(false, null, quizData[index].answer);
-            }
-            currentQuestionIndex++;
-            showQuestion(currentQuestionIndex); // Показываем следующий вопрос
-        });
-        questionsDiv.appendChild(nextButton);
-    } else {
-        // Если это последний вопрос, показываем кнопку "Завершить тест"
-        const finishButton = document.createElement('button');
-        finishButton.textContent = 'Завершить тест';
-        finishButton.addEventListener('click', () => {
-            const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
-            if (selectedOption) {
-                const isCorrect = selectedOption.value === quizData[index].answer;
-                if (isCorrect) {
-                    correctAnswers++;
-                } else {
-                    incorrectAnswers++;
-                }
-                showFeedback(isCorrect, selectedOption.value, quizData[index].answer);
-            } else {
-                incorrectAnswers++;
-                showFeedback(false, null, quizData[index].answer);
-            }
-            showResults(); // Показываем результаты
-        });
-        questionsDiv.appendChild(finishButton);
-    }
-}
+        const optionsContainer = document.getElementById("options");
+        optionsContainer.innerHTML = "";  // Очищаем старые варианты ответов
 
-function showFeedback(isCorrect, userAnswer, correctAnswer) {
-    feedbackDiv.classList.remove('hidden');
-    feedbackDiv.classList.remove('correct', 'incorrect');
-    feedbackDiv.classList.add(isCorrect ? 'correct' : 'incorrect');
+        // В зависимости от режима показываем вариант с кнопками или поле для ввода
+        if (mode === "closed") {
+            let options = getFilteredQuestions().map(q => q.answer);
+            options = options.filter(opt => opt !== currentQuestion.answer);  // Исключаем правильный ответ из опций
+            shuffleArray(options);
+            options = options.slice(0, 3);
+            options.push(currentQuestion.answer);
+            shuffleArray(options);
 
-    // Сохраняем последний ответ
-    lastAnswer = {
-        isCorrect,
-        userAnswer,
-        correctAnswer
-    };
-
-    if (isCorrect) {
-        feedbackDiv.innerHTML = `
-            <p>✅ Ваш ответ: <strong>${userAnswer}</strong> (правильно)</p>
-            <p>Правильных ответов: ${correctAnswers}</p>
-            <p>Неправильных ответов: ${incorrectAnswers}</p>
-        `;
-    } else {
-        feedbackDiv.innerHTML = `
-            <p>❌ Ваш ответ: <strong>${userAnswer || '—'}</strong> (неправильно)</p>
-            <p>Правильный ответ: <strong>${correctAnswer}</strong></p>
-            <p>Правильных ответов: ${correctAnswers}</p>
-            <p>Неправильных ответов: ${incorrectAnswers}</p>
-        `;
-    }
-}
-
-function showResults() {
-    quizContainer.classList.add('hidden'); // Скрываем контейнер с вопросами
-    resultsDiv.classList.remove('hidden'); // Показываем контейнер с результатами
-
-    // Отображаем последний ответ
-    let lastAnswerHtml = '';
-    if (lastAnswer) {
-        if (lastAnswer.isCorrect) {
-            lastAnswerHtml = `
-                <p>✅ Последний ответ: <strong>${lastAnswer.userAnswer}</strong> (правильно)</p>
-            `;
+            options.forEach(option => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.onclick = () => checkAnswer(option);  // Проверка ответа по кнопке
+                optionsContainer.appendChild(button);
+            });
         } else {
-            lastAnswerHtml = `
-                <p>❌ Последний ответ: <strong>${lastAnswer.userAnswer || '—'}</strong> (неправильно)</p>
-                <p>Правильный ответ: <strong>${lastAnswer.correctAnswer}</strong></p>
-            `;
+            document.getElementById("answerInput").style.display = "block"; // Показываем поле для ввода
+            document.getElementById("submitAnswer").style.display = "block"; // Показываем кнопку "Ответить"
+            document.getElementById("submitAnswer").onclick = () => checkAnswer(document.getElementById("answerInput").value.trim().toLowerCase()); // Проверка ответа при вводе
         }
+
+        nextButton.style.display = "none"; // Скрываем кнопку до того, как ответ будет проверен
+    }, 1000);
+}
+
+function checkAnswer(userAnswer) {
+    const correctAnswer = currentQuestion.answer.trim().toLowerCase();  // Правильный ответ
+
+    if (userAnswer === correctAnswer) {
+        score.correct++;
+        document.getElementById("status").textContent = `Правильный ответ: ${correctAnswer}`;
+    } else {
+        score.incorrect++;
+        document.getElementById("status").textContent = `Неправильный ответ. Правильный: ${correctAnswer}`;
     }
 
-    scoreDisplay.innerHTML = `
-        ${lastAnswerHtml}
-        <p>Правильных ответов: ${correctAnswers}</p>
-        <p>Неправильных ответов: ${incorrectAnswers}</p>
-    `;
+    // Скрываем поле ввода и кнопку "Ответить" после того, как проверен ответ
+    document.getElementById("submitAnswer").style.display = "none";
+    document.getElementById("answerInput").style.display = "none";
+
+    // Показываем кнопку "Пропустить" для перехода к следующему вопросу
+    loadQuestion();
 }
 
-restartButton.addEventListener('click', () => {
-    resultsDiv.classList.add('hidden'); // Скрываем контейнер с результатами
-    document.querySelector('.container').classList.remove('hidden'); // Показываем контейнер с кнопками
-    correctAnswers = 0; // Сбрасываем счётчик правильных ответов
-    incorrectAnswers = 0; // Сбрасываем счётчик неправильных ответов
-    currentQuestionIndex = 0; // Сбрасываем индекс текущего вопроса
-    feedbackDiv.classList.add('hidden'); // Скрываем блок с результатом
-    lastAnswer = null; // Сбрасываем последний ответ
+// Загружаем следующий вопрос при нажатии на кнопку "Пропустить"
+document.getElementById("nextQuestion").addEventListener("click", () => {
+    loadQuestion();
+    document.getElementById("nextQuestion").style.display = "none"; // Скрываем кнопку "Пропустить" после перехода к следующему вопросу
 });
 
-function escapeHtml(unsafe) {
-    return unsafe.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
+// Привязываем обработчик события к кнопке завершения теста
+document.getElementById("endTest").addEventListener("click", endTest);

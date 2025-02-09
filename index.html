@@ -3,30 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Викторина</title>
+    <title>Тест по хирагане и катакане</title>
     <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Добро пожаловать в викторину!</h1>
-        <p>Выберите тип тестирования:</p>
-        <button id="open-test">Открытый тест</button>
-        <button id="closed-test">Закрытый тест</button>
-    </div>
-
-    <div id="quiz-container" class="quiz-container hidden">
-    <div id="feedback" class="feedback hidden"></div> <!-- Перемещаем сюда -->
-    <h2 id="quiz-title"></h2>
-    <div id="questions"></div>
-     <button id="submit">Завершить тест</button>
+    <div id="setupScreen">
+        <h1>Выберите категорию и режим теста</h1>
+        <label for="categorySelect">Категория:</label>
+        <select id="categorySelect">
+            <option value="Все звуки">Все звуки</option>
+            <option value="Базовые">Базовые</option>
+            <option value="Нигори и Мару">Нигори и Мару</option>
+            <!-- <option value="Ёон">Ёон</option> -->
+            <option value="Гласные">Гласные</option>
+            <option value="Ряд К">Ряд К</option>
+            <option value="Ряд С">Ряд С</option>
+            <option value="Ряд Т">Ряд Т</option>
+            <option value="Ряд Н">Ряд Н</option>
+            <option value="Ряд Х">Ряд Х</option>
+            <option value="Ряд М">Ряд М</option>
+            <option value="Ряд Р">Ряд Р</option>
+        </select>
+        
+        <h2>Выберите режим</h2>
+        <label>
+            <input type="radio" name="modeSelect" value="closed" checked> Закрытый (выбор варианта)
+        </label>
+        <label>
+            <input type="radio" name="modeSelect" value="open"> Открытый (ввод вручную)
+        </label>
+        
+        <button onclick="startTest()">Начать тест</button>
     </div>
     
-    <div id="results" class="results hidden">
-        <h2>Результаты</h2>
-        <p id="score"></p>
-        <button id="restart">Начать заново</button>
+    <div id="testContainer" style="display: none;">
+        <h1 id="question"></h1>
+        <div id="options"></div>
+        <input type="text" id="answerInput" style="display: none;">
+        <button id="submitAnswer" style="display: none;">Ответить</button>
+        <p id="status"></p>
+        <button id="nextQuestion" style="display: none;">Пропустить</button>
+        <button id="endTest">Завершить тест</button> <!-- Добавлена кнопка для завершения теста -->
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
