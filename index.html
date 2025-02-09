@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать в викторину!</h1>
+        <p>Выберите тип тестирования:</p>
+        <button id="open-test">Открытый тест</button>
+        <button id="closed-test">Закрытый тест</button>
+    </div>
+
+    <div id="quiz-container" class="quiz-container hidden">
+    <div id="feedback" class="feedback hidden"></div> <!-- Перемещаем сюда -->
+    <h2 id="quiz-title"></h2>
+    <div id="questions"></div>
+     <button id="submit">Завершить тест</button>
+    </div>
+    
+    <div id="results" class="results hidden">
+        <h2>Результаты</h2>
+        <p id="score"></p>
+        <button id="restart">Начать заново</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
