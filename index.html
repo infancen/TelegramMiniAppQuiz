@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тест по хирагане и катакане</title>
+    <title>Тест по японскому языку</title>
     <link rel="stylesheet" href="styles.css">
     <script defer src="script.js"></script>
 </head>
 <body>
-    <div id="setupScreen">
-        <h1>Выберите категорию и режим теста</h1>
+    <div id="testSelection">
+        <h1>Выберите тест</h1>
+        <button onclick="selectTest('hiragana')">Хирагана</button>
+        <button onclick="selectTest('katakana')">Катакана</button>
+    </div>
+    
+    <div id="setupScreen" style="display: none;">
+        <h1>Настройки теста</h1>
         <label for="categorySelect">Категория:</label>
-        <select id="categorySelect">
+        <select id="categorySelect" multiple>
             <option value="Все звуки">Все звуки</option>
             <option value="Базовые">Базовые</option>
             <option value="Нигори и Мару">Нигори и Мару</option>
-            <!-- <option value="Ёон">Ёон</option> -->
+            <option value="Ёон">Ёон</option>
             <option value="Гласные">Гласные</option>
             <option value="Ряд К">Ряд К</option>
             <option value="Ряд С">Ряд С</option>
@@ -26,13 +32,13 @@
             <option value="Ряд Р">Ряд Р</option>
         </select>
         
-        <h2>Выберите режим</h2>
-        <label>
-            <input type="radio" name="modeSelect" value="closed" checked> Закрытый (выбор варианта)
-        </label>
-        <label>
-            <input type="radio" name="modeSelect" value="open"> Открытый (ввод вручную)
-        </label>
+        <h2>Направление перевода</h2>
+        <label><input type="radio" name="direction" value="jp-ru" checked> Японский → Русский</label>
+        <label><input type="radio" name="direction" value="ru-jp"> Русский → Японский</label>
+        
+        <h2>Режим</h2>
+        <label><input type="radio" name="modeSelect" value="closed" checked> Закрытый</label>
+        <label><input type="radio" name="modeSelect" value="open"> Открытый</label>
         
         <button onclick="startTest()">Начать тест</button>
     </div>
@@ -43,8 +49,7 @@
         <input type="text" id="answerInput" style="display: none;">
         <button id="submitAnswer" style="display: none;">Ответить</button>
         <p id="status"></p>
-        <button id="nextQuestion" style="display: none;">Пропустить</button>
-        <button id="endTest">Завершить тест</button> <!-- Добавлена кнопка для завершения теста -->
+        <button id="endTest">Завершить тест</button>
     </div>
 </body>
 </html>

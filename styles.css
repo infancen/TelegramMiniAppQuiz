@@ -1,155 +1,44 @@
-/* Общие стили для страницы */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
-}
-
 body {
-    background-color: #f0f0f0;
-    color: #333;
-    font-size: 16px;
-    line-height: 1.5;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    margin: 0;
     padding: 20px;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
-
-/* Заголовки */
-h1, h2 {
-    text-align: center;
-    color: #2c3e50;
-}
-
-h1 {
-    margin-bottom: 20px;
-}
-
-/* Стили для настроек теста */
-#setupScreen {
-    text-align: center;
-}
-
-#setupScreen label {
-    display: block;
-    margin: 10px 0;
-    font-weight: bold;
-}
-
-#setupScreen select, #setupScreen input {
-    padding: 10px;
-    margin-top: 5px;
-    width: 80%;
-    max-width: 300px;
-}
-
 button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-button:disabled {
-    background-color: #95a5a6;
-    cursor: not-allowed;
-}
-
-/* Стилей для вопросов теста */
-#testContainer {
-    display: none;
-    text-align: center;
-}
-
-#testContainer h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
-}
-
-#options {
-    margin-bottom: 20px;
-}
-
-#options button {
-    background-color: #e74c3c;
     padding: 10px 20px;
     margin: 5px;
-    color: white;
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-#options button:hover {
-    background-color: #c0392b;
-}
-
-#answerInput {
-    padding: 10px;
-    width: 80%;
+    font-size: 16px;
+    width: 90%;
     max-width: 300px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#testContainer, #setupScreen {
+    display: none;
+}
+
+#options
+{
+    margin-left: auto;
+    margin-right: auto;
+    width: 90%;
+    max-width: 300px;
+}
+#options button {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+}
+input, select {
     font-size: 16px;
-    margin-bottom: 20px;
-}
-
-#submitAnswer {
-    background-color: #27ae60;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-#submitAnswer:hover {
-    background-color: #2ecc71;
-}
-
-/* Статус ответа */
-#status {
-    margin-top: 20px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-#nextQuestion {
-    background-color: #f39c12;
-    padding: 10px 20px;
-    margin-top: 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-#nextQuestion:hover {
-    background-color: #e67e22;
-}
-
-@media screen and (max-width: 600px) {
-    h1 {
-        font-size: 2rem;
-    }
-
-    #testContainer h1 {
-        font-size: 2.5rem;
-    }
-
-    button, #options button, #nextQuestion, #submitAnswer {
-        width: 100%;
-        font-size: 18px;
-    }
-
-    #answerInput {
-        width: 100%;
-    }
+    padding: 10px;
+    width: 90%;
+    max-width: 300px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
