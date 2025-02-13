@@ -6,6 +6,7 @@ let mode = "closed";
 let questions = [];
 let correctCount = 0;
 let incorrectCount = 0;
+let lastQuestion = null;
 
 // Загрузка данных и категорий
 document.addEventListener("DOMContentLoaded", async () => {
@@ -53,13 +54,21 @@ function startTest() {
 }
 
 function loadQuestion() {
-    const question = questions[Math.floor(Math.random() * questions.length)];
+
+    let question;
+    do {
+        question = questions[Math.floor(Math.random() * questions.length)];
+    } while (question === lastQuestion);
+
+    lastQuestion = question;
     document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
     
     if (mode === "closed") {
-        let options = shuffle([...questions].slice(0, 4));
-        if (!options.some(q => q === question)) options[0] = question;
-        
+        let options = data[currentTest].filter(q => q !== question && q.categories.some(cat => question.categories.includes(cat)));
+        options = shuffle(options).slice(0, 3);
+        options.push(question);
+        options = shuffle(options);
+
         document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${q.ru}')">${q.ru}</button>`).join('');
         document.getElementById("answerInput").style.display = "none";
         document.getElementById("submitAnswer").style.display = "none";
@@ -73,19 +82,37 @@ function loadQuestion() {
 
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
-    const question = questions.find(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
+
+    const questionIndex = questions.findIndex(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
+    const question = questions[questionIndex];
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
-    
-    if (answer.trim() === correctAnswer) {
-        correctCount++;
-        document.getElementById("status").textContent = "Правильно!";
-    } else {
-        incorrectCount++;
-        document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
-    }
-    
-    setTimeout(loadQuestion, 1000);
-}
+    const optionButtons = document.querySelectorAll("#options button");
+
+    optionButtons.forEach(button => {
+        if (button.textContent === correctAnswer) {
+            button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
+        }
+        if (button.textContent === answer) {
+            if (answer.trim() === correctAnswer) {
+                correctCount++;
+                document.getElementById("status").textContent = "Правильно!";
+                button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Подсветить зелёным, если правильно
+            } else {
+                incorrectCount++;
+                document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+                button.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Подсветить красным, если неправильно
+            }
+        }
+        button.disabled = true; // Заблокировать кнопки после ответа
+    });
+
+    setTimeout(() => {
+        optionButtons.forEach(button => {
+            button.style.backgroundColor = "";
+            button.disabled = false;
+        });
+        loadQuestion();
+    }, 1000);
 
 function endTest() {
     alert(`Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`);
@@ -101,4 +128,30 @@ function shuffle(array) {
     return array;
 }
 
+
 document.getElementById("endTest").addEventListener("click", endTest);
+
+// Автотест для проверки, что вопросы не повторяются подряд
+function autoTestNoConsecutiveRepeats() {
+    const iterations = 1000;
+    let previousQuestion = null;
+    let consecutiveRepeats = 0;
+
+    for (let i = 0; i < iterations; i++) {
+        loadQuestion();
+        const currentQuestion = document.getElementById("question").textContent;
+        
+        if (currentQuestion === previousQuestion) {
+            consecutiveRepeats++;
+            console.error(`Ошибка: Вопрос повторяется подряд (${currentQuestion})`);
+        }
+        
+        previousQuestion = currentQuestion;
+    }
+
+    if (consecutiveRepeats === 0) {
+        console.log("Тест пройден: Вопросы не повторяются подряд.");
+    } else {
+        console.error(`Тест провален: Повторений подряд - ${consecutiveRepeats}`);
+    }
+};
