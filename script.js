@@ -57,9 +57,11 @@ function loadQuestion() {
     document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
     
     if (mode === "closed") {
-        let options = shuffle([...questions].slice(0, 4));
-        if (!options.some(q => q === question)) options[0] = question;
-        
+        let options = data[currentTest].filter(q => q !== question && q.categories.some(cat => question.categories.includes(cat)));
+        options = shuffle(options).slice(0, 3);
+        options.push(question);
+        options = shuffle(options);
+
         document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${q.ru}')">${q.ru}</button>`).join('');
         document.getElementById("answerInput").style.display = "none";
         document.getElementById("submitAnswer").style.display = "none";
