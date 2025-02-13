@@ -77,16 +77,33 @@ function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
     const question = questions.find(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
-    
-    if (answer.trim() === correctAnswer) {
-        correctCount++;
-        document.getElementById("status").textContent = "Правильно!";
-    } else {
-        incorrectCount++;
-        document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
-    }
-    
-    setTimeout(loadQuestion, 1000);
+    const optionButtons = document.querySelectorAll("#options button");
+
+    optionButtons.forEach(button => {
+        if (button.textContent === correctAnswer) {
+            button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
+        }
+        if (button.textContent === answer) {
+            if (answer.trim() === correctAnswer) {
+                correctCount++;
+                document.getElementById("status").textContent = "Правильно!";
+                button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Подсветить зелёным, если правильно
+            } else {
+                incorrectCount++;
+                document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+                button.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Подсветить красным, если неправильно
+            }
+        }
+        button.disabled = true; // Заблокировать кнопки после ответа
+    });
+
+    setTimeout(() => {
+        optionButtons.forEach(button => {
+            button.style.backgroundColor = "";
+            button.disabled = false;
+        });
+        loadQuestion();
+    }, 1000);
 }
 
 function endTest() {
