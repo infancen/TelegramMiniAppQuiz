@@ -6,6 +6,7 @@ let mode = "closed";
 let questions = [];
 let correctCount = 0;
 let incorrectCount = 0;
+let lastQuestion = null;
 
 // Загрузка данных и категорий
 document.addEventListener("DOMContentLoaded", async () => {
@@ -53,7 +54,12 @@ function startTest() {
 }
 
 function loadQuestion() {
-    const question = questions[Math.floor(Math.random() * questions.length)];
+    let question;
+    do {
+        question = questions[Math.floor(Math.random() * questions.length)];
+    } while (question === lastQuestion);
+
+    lastQuestion = question;
     document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
     
     if (mode === "closed") {
@@ -75,7 +81,8 @@ function loadQuestion() {
 
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
-    const question = questions.find(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
+    const questionIndex = questions.findIndex(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
+    const question = questions[questionIndex];
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
     const optionButtons = document.querySelectorAll("#options button");
 
@@ -121,3 +128,28 @@ function shuffle(array) {
 }
 
 document.getElementById("endTest").addEventListener("click", endTest);
+
+// Автотест для проверки, что вопросы не повторяются подряд
+function autoTestNoConsecutiveRepeats() {
+    const iterations = 1000;
+    let previousQuestion = null;
+    let consecutiveRepeats = 0;
+
+    for (let i = 0; i < iterations; i++) {
+        loadQuestion();
+        const currentQuestion = document.getElementById("question").textContent;
+        
+        if (currentQuestion === previousQuestion) {
+            consecutiveRepeats++;
+            console.error(`Ошибка: Вопрос повторяется подряд (${currentQuestion})`);
+        }
+        
+        previousQuestion = currentQuestion;
+    }
+
+    if (consecutiveRepeats === 0) {
+        console.log("Тест пройден: Вопросы не повторяются подряд.");
+    } else {
+        console.error(`Тест провален: Повторений подряд - ${consecutiveRepeats}`);
+    }
+};
