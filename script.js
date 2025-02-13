@@ -54,6 +54,7 @@ function startTest() {
 }
 
 function loadQuestion() {
+
     let question;
     do {
         question = questions[Math.floor(Math.random() * questions.length)];
@@ -81,6 +82,7 @@ function loadQuestion() {
 
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
+
     const questionIndex = questions.findIndex(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
     const question = questions[questionIndex];
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
@@ -111,7 +113,6 @@ function checkAnswer(answer) {
         });
         loadQuestion();
     }, 1000);
-}
 
 function endTest() {
     alert(`Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`);
@@ -126,6 +127,7 @@ function shuffle(array) {
     }
     return array;
 }
+
 
 document.getElementById("endTest").addEventListener("click", endTest);
 
