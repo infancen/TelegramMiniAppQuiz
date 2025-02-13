@@ -113,6 +113,7 @@ function checkAnswer(answer) {
         });
         loadQuestion();
     }, 1000);
+}
 
 function endTest() {
     alert(`Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`);
