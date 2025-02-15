@@ -1,4 +1,5 @@
 let data;
+let lastQuestion = null;
 let currentTest = "";
 let selectedCategories = [];
 let direction = "jp-ru";
@@ -6,7 +7,6 @@ let mode = "closed";
 let questions = [];
 let correctCount = 0;
 let incorrectCount = 0;
-let lastQuestion = null;
 
 // Загрузка данных и категорий
 document.addEventListener("DOMContentLoaded", async () => {
@@ -54,13 +54,12 @@ function startTest() {
 }
 
 function loadQuestion() {
-
     let question;
     do {
         question = questions[Math.floor(Math.random() * questions.length)];
     } while (question === lastQuestion);
-
     lastQuestion = question;
+
     document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
     
     if (mode === "closed") {
@@ -69,7 +68,7 @@ function loadQuestion() {
         options.push(question);
         options = shuffle(options);
 
-        document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${q.ru}')">${q.ru}</button>`).join('');
+        document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${direction === "jp-ru" ? q.ru : q.jp}')">${direction === "jp-ru" ? q.ru : q.jp}</button>`).join('');
         document.getElementById("answerInput").style.display = "none";
         document.getElementById("submitAnswer").style.display = "none";
     } else {
@@ -82,31 +81,48 @@ function loadQuestion() {
 
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
-
     const questionIndex = questions.findIndex(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
     const question = questions[questionIndex];
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
     const optionButtons = document.querySelectorAll("#options button");
 
-    optionButtons.forEach(button => {
-        if (button.textContent === correctAnswer) {
-            button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
-        }
-        if (button.textContent === answer) {
-            if (answer.trim() === correctAnswer) {
-                correctCount++;
-                document.getElementById("status").textContent = "Правильно!";
-                button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Подсветить зелёным, если правильно
-            } else {
-                incorrectCount++;
-                document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
-                button.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Подсветить красным, если неправильно
+    if (mode === "closed") {
+        optionButtons.forEach(button => {
+            if (button.textContent === correctAnswer) {
+                button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
             }
+            if (button.textContent === answer) {
+                if (answer.trim() === correctAnswer) {
+                    correctCount++;
+                    document.getElementById("status").textContent = "Правильно!";
+                    button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
+                } else {
+                    incorrectCount++;
+                    document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+                    button.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Красный
+                }
+            }
+            button.disabled = true;
+        });
+    } else {
+        if (answer.trim() === correctAnswer) {
+            correctCount++;
+            document.getElementById("status").textContent = "Правильно!";
+        } else {
+            incorrectCount++;
+            document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
         }
-        button.disabled = true; // Заблокировать кнопки после ответа
-    });
+    }
 
     setTimeout(() => {
+        optionButtons.forEach(button => {
+            button.style.backgroundColor = "";
+            button.disabled = false;
+        });
+        document.getElementById("status").textContent = "";
+        document.getElementById("answerInput").value = "";
+        loadQuestion();
+    }, 1000);(() => {
         optionButtons.forEach(button => {
             button.style.backgroundColor = "";
             button.disabled = false;
@@ -116,6 +132,7 @@ function checkAnswer(answer) {
 }
 
 function endTest() {
+    document.getElementById("status").textContent = "";
     alert(`Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`);
     document.getElementById("testContainer").style.display = "none";
     document.getElementById("testSelection").style.display = "block";
@@ -129,8 +146,13 @@ function shuffle(array) {
     return array;
 }
 
-
 document.getElementById("endTest").addEventListener("click", endTest);
+
+document.getElementById("answerInput").addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+        checkAnswer(document.getElementById("answerInput").value);
+    }
+});
 
 // Автотест для проверки, что вопросы не повторяются подряд
 function autoTestNoConsecutiveRepeats() {
