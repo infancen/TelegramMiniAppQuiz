@@ -113,6 +113,7 @@ function checkAnswer(answer) {
         return;
     }
 
+
     const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
     const optionButtons = document.querySelectorAll("#options button");
 
