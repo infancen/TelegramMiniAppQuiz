@@ -59,51 +59,66 @@ function startTest() {
 }
 
 function loadQuestion() {
+    // Если вопросы закончились, сбрасываем флаги answered и перезагружаем список
     if (questions.length === 0) {
         resetQuestions(); // Сбрасываем флаги answered
-        questions = shuffle(data[currentTest].filter(q => selectedCategories.includes('Все звуки') || q.categories.some(c => selectedCategories.includes(c))));
-        if (questions.length > 1 && lastQuestion) {
-            questions = questions.filter(q => q !== lastQuestion);
-        }
+        questions = shuffle(data[currentTest].filter(q =>
+            selectedCategories.includes("Все звуки") || q.categories.some(c => selectedCategories.includes(c))
+        )); // Закрывающая скобка для filter и shuffle
     }
 
-    question = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
-    lastQuestion = question;
+    // Исключаем lastQuestion из списка, если он есть
+    if (questions.length > 1 && lastQuestion) {
+        questions = questions.filter(q => q !== lastQuestion);
+    }
 
-    document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
+    // Если вопросы всё ещё доступны, выбираем следующий
+    if (questions.length > 0) {
+        question = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
+        lastQuestion = question;
 
-    if (mode === "closed") {
-        let options = data[currentTest].filter(q => q !== question && q.categories.some(cat => question.categories.includes(cat)));
-        options = shuffle(options).slice(0, 3);
-        options.push(question);
-        options = shuffle(options);
+        document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
 
-        document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${direction === "jp-ru" ? q.ru : q.jp}')">${direction === "jp-ru" ? q.ru : q.jp}</button>`).join('');
-        document.getElementById("answerInput").style.display = "none";
-        document.getElementById("submitAnswer").style.display = "none";
-    } else {
-        document.getElementById("options").innerHTML = "";
-        document.getElementById("answerInput").style.display = "block";
-        document.getElementById("submitAnswer").style.display = "block";
+        if (mode === "closed") {
+            let options = data[currentTest].filter(q => q !== question && q.categories.some(cat => question.categories.includes(cat)));
+            options = shuffle(options).slice(0, 3);
+            options.push(question);
+            options = shuffle(options);
 
-        // Очистка поля ввода
-        document.getElementById("answerInput").value = "";
+            document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${direction === "jp-ru" ? q.ru : q.jp}')">${direction === "jp-ru" ? q.ru : q.jp}</button>`).join('');
+            document.getElementById("answerInput").style.display = "none";
+            document.getElementById("submitAnswer").style.display = "none";
+        } else {
+            document.getElementById("options").innerHTML = "";
+            document.getElementById("answerInput").style.display = "block";
+            document.getElementById("submitAnswer").style.display = "block";
 
-        // Удаляем старый обработчик (если есть)
-        document.getElementById("answerInput").removeEventListener("keypress", handleEnterKey);
+            // Очистка поля ввода
+            document.getElementById("answerInput").value = "";
 
-        // Объявляем handleEnterKey как функцию
-        function handleEnterKey(event) {
-            if (event.key === "Enter") {
-                checkAnswer(document.getElementById("answerInput").value);
+            // Удаляем старый обработчик (если есть)
+            document.getElementById("answerInput").removeEventListener("keypress", handleEnterKey);
+
+            // Объявляем handleEnterKey как функцию
+            function handleEnterKey(event) {
+                if (event.key === "Enter") {
+                    checkAnswer(document.getElementById("answerInput").value);
+                }
             }
+
+            // Добавляем новый обработчик нажатия Enter
+            document.getElementById("answerInput").addEventListener("keypress", handleEnterKey);
+
+            // Обработчик нажатия кнопки "Ответить"
+            document.getElementById("submitAnswer").onclick = () => checkAnswer(document.getElementById("answerInput").value);
         }
-
-        // Добавляем новый обработчик нажатия Enter
-        document.getElementById("answerInput").addEventListener("keypress", handleEnterKey);
-
-        // Обработчик нажатия кнопки "Ответить"
-        document.getElementById("submitAnswer").onclick = () => checkAnswer(document.getElementById("answerInput").value);
+    } else {
+        // Если вопросы всё ещё недоступны (например, все вопросы отвечены), сбрасываем и начинаем заново
+        resetQuestions();
+        questions = shuffle(data[currentTest].filter(q =>
+            selectedCategories.includes("Все звуки") || q.categories.some(c => selectedCategories.includes(c))
+        )); // Закрывающая скобка для filter и shuffle
+        loadQuestion(); // Рекурсивно вызываем loadQuestion для загрузки нового вопроса
     }
 }
 
