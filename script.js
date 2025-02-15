@@ -160,6 +160,8 @@ function checkAnswer(answer) {
         }
     }
 
+    updateCounters();
+
     setTimeout(() => {
         optionButtons.forEach(button => {
             button.style.backgroundColor = "";
@@ -191,6 +193,11 @@ function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+function updateCounters() {
+    document.getElementById("correctCountDisplay").textContent = correctCount;
+    document.getElementById("incorrectCountDisplay").textContent = incorrectCount;
 }
 
 document.getElementById("endTest").addEventListener("click", endTest);
