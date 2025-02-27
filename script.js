@@ -140,6 +140,7 @@ function startTest() {
 }
 
 function loadQuestion() {
+    // Если вопросы закончились, сбрасываем флаги answered и перезагружаем список
     if (questions.length === 0) {
         resetQuestions();
     }
