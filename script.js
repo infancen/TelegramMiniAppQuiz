@@ -1,4 +1,3 @@
-// JavaScript (script.js)
 let data;
 let lastQuestion = null;
 let currentTest = "";
@@ -10,23 +9,104 @@ let question;
 let correctCount = 0;
 let incorrectCount = 0;
 
+const testConfig = {
+    hiragana: {
+        getQuestion: (entry) => direction === "jp-ru" ? entry.jp : entry.ru,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.ru : entry.jp,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
+        getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
+        getDictionary: () => "hiragana",
+        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
+    },
+    katakana: {
+        getQuestion: (entry) => entry.jp,
+        getAnswer: (entry) => entry.ru,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
+        getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
+        getDictionary: () => "katakana",
+        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
+    },
+    numbersTranslit: {
+        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.ru_reading,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.ru_reading : entry.number,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
+        getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.ru_reading === question),
+        getDictionary: () => "numbers",
+        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
+    },
+    numbersHiragana: {
+        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.jp_reading,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.jp_reading : entry.number,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
+        getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.jp_reading === question),
+        getDictionary: () => "numbers",
+        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
+    },
+};
+
 // Загрузка данных и категорий
 document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch("data.json");
     data = await response.json();
+
+    // Добавляем обработчик для input
+    document.getElementById("answerInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Предотвращаем стандартное поведение
+
+            const inputValue = document.getElementById("answerInput").value.trim();
+            if (inputValue === "") {
+                // Если поле ввода пустое, показываем сообщение или просто игнорируем
+                alert("Поле ввода не может быть пустым!");
+                return;
+            }
+
+            checkAnswer(inputValue); // Вызываем checkAnswer с текущим значением input
+        }
+    });
+
+    focusOnInput();
 });
+
+function focusOnInput() {
+     // Автоматически фокусируемся на поле ввода для мобильных устройств
+     if (/Mobi|Android/i.test(navigator.userAgent)) {
+        const answerInput = document.getElementById("answerInput");
+        if (answerInput.style.display !== "none") {
+            answerInput.focus(); // Фокусируемся на поле ввода
+        }
+    }
+}
+
+function getCurrentDictionaryData() {
+    return data[testConfig[currentTest].getDictionary()];
+}
+
+function getCurrentEntry() {
+    return getCurrentDictionaryData().findIndex(q => q.jp === question || q.ru === question);
+}
 
 function populateCategories() {
     const categorySelect = document.getElementById("categorySelect");
-    const allCategories = new Set();
+    categorySelect.innerHTML = ""; // Очищаем список
     
-    if (currentTest && data[currentTest]) {
-        data[currentTest].forEach(entry => {
-            entry.categories.forEach(cat => allCategories.add(cat));
+    if (currentTest && data[testConfig[currentTest].getDictionary()]) {
+        const allCategories = new Set();
+        
+        // Добавляем вариант "Все звуки" или "Все цифры" первым элементом
+        const allOption = testConfig[currentTest].getAllOption();
+        categorySelect.innerHTML += `<option value="${allOption}">${allOption}</option>`;
+        
+        // Собираем остальные категории
+        data[testConfig[currentTest].getDictionary()].forEach(entry => {
+            if (entry.categories) {
+                entry.categories.forEach(cat => allCategories.add(cat));
+            }
         });
+        
+        // Добавляем остальные категории в список
+        categorySelect.innerHTML += Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
     }
-    
-    categorySelect.innerHTML = Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
 }
 
 function selectTest(testType) {
@@ -41,158 +121,155 @@ function startTest() {
     direction = document.querySelector("input[name='direction']:checked").value;
     mode = document.querySelector("input[name='modeSelect']:checked").value;
 
-    questions = data[currentTest].filter(q => selectedCategories.includes("Все звуки") || q.categories.some(c => selectedCategories.includes(c)));
+    resetQuestions();
 
     if (questions.length === 0) {
         alert("Нет вопросов в выбранных категориях");
         return;
     }
 
-    // Очистка поля ввода
     document.getElementById("answerInput").value = "";
-
     document.getElementById("setupScreen").style.display = "none";
     document.getElementById("testContainer").style.display = "block";
+    document.getElementById("answerInput").style.display = mode === "open" ? "block" : "none";
+    document.getElementById("submitAnswer").style.display = mode === "open" ? "block" : "none";
     correctCount = 0;
     incorrectCount = 0;
+    updateScore();
     loadQuestion();
 }
 
 function loadQuestion() {
     // Если вопросы закончились, сбрасываем флаги answered и перезагружаем список
     if (questions.length === 0) {
-        resetQuestions(); // Сбрасываем флаги answered
-        questions = shuffle(data[currentTest].filter(q =>
-            selectedCategories.includes("Все звуки") || q.categories.some(c => selectedCategories.includes(c))
-        )); // Закрывающая скобка для filter и shuffle
+        resetQuestions();
     }
 
-    // Исключаем lastQuestion из списка, если он есть
     if (questions.length > 1 && lastQuestion) {
         questions = questions.filter(q => q !== lastQuestion);
     }
 
-    // Если вопросы всё ещё доступны, выбираем следующий
     if (questions.length > 0) {
         question = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
         lastQuestion = question;
 
-        document.getElementById("question").textContent = direction === "jp-ru" ? question.jp : question.ru;
+        document.getElementById("question").textContent = testConfig[currentTest].getQuestion(question);
 
         if (mode === "closed") {
-            let options = data[currentTest].filter(q => q !== question && q.categories.some(cat => question.categories.includes(cat)));
-            options = shuffle(options).slice(0, 3);
-            options.push(question);
-            options = shuffle(options);
-
-            document.getElementById("options").innerHTML = options.map(q => `<button onclick="checkAnswer('${direction === "jp-ru" ? q.ru : q.jp}')">${direction === "jp-ru" ? q.ru : q.jp}</button>`).join('');
-            document.getElementById("answerInput").style.display = "none";
-            document.getElementById("submitAnswer").style.display = "none";
+            populateAnswerOptions();
         } else {
-            document.getElementById("options").innerHTML = "";
-            document.getElementById("answerInput").style.display = "block";
-            document.getElementById("submitAnswer").style.display = "block";
-
-            // Очистка поля ввода
-            document.getElementById("answerInput").value = "";
-
-            // Удаляем старый обработчик (если есть)
-            document.getElementById("answerInput").removeEventListener("keypress", handleEnterKey);
-
-            // Объявляем handleEnterKey как функцию
-            function handleEnterKey(event) {
-                if (event.key === "Enter") {
-                    checkAnswer(document.getElementById("answerInput").value);
-                }
-            }
-
-            // Добавляем новый обработчик нажатия Enter
-            document.getElementById("answerInput").addEventListener("keypress", handleEnterKey);
-
-            // Обработчик нажатия кнопки "Ответить"
-            document.getElementById("submitAnswer").onclick = () => checkAnswer(document.getElementById("answerInput").value);
+            document.getElementById("answerOptions").innerHTML = "";
         }
-    } else {
-        // Если вопросы всё ещё недоступны (например, все вопросы отвечены), сбрасываем и начинаем заново
-        resetQuestions();
-        questions = shuffle(data[currentTest].filter(q =>
-            selectedCategories.includes("Все звуки") || q.categories.some(c => selectedCategories.includes(c))
-        )); // Закрывающая скобка для filter и shuffle
-        loadQuestion(); // Рекурсивно вызываем loadQuestion для загрузки нового вопроса
     }
 }
 
-function checkAnswer(answer) {
-    if (!question) {
-        console.error("Ошибка: Вопрос не загружен.");
-        return;
+function populateAnswerOptions() {
+    const answerContainer = document.getElementById("answerOptions");
+    answerContainer.innerHTML = "";
+    
+    let allAnswers;
+    if (selectedCategories.includes(testConfig[currentTest].getAllOption())) {
+        // Если выбрана категория "Все звуки" или "Все цифры", берем все ответы из словаря
+        allAnswers = getCurrentDictionaryData().map(q => testConfig[currentTest].getAnswer(q));
+    } else {
+        // Иначе фильтруем ответы по выбранным категориям
+        allAnswers = getCurrentDictionaryData()
+            .filter(q => q.categories.some(c => selectedCategories.includes(c)))
+            .map(q => testConfig[currentTest].getAnswer(q));
     }
 
+    let uniqueAnswers = [...new Set(allAnswers)];
+    let correctAnswer = testConfig[currentTest].getAnswer(question);
+    
+    let options = uniqueAnswers.sort(() => Math.random() - 0.5).slice(0, 4);
+    if (!options.includes(correctAnswer)) {
+        options[Math.floor(Math.random() * options.length)] = correctAnswer;
+    }
+    
+    options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option;
+        button.onclick = () => checkAnswer(option);
+        answerContainer.appendChild(button);
+    });
+}
 
-    const correctAnswer = direction === "jp-ru" ? question.ru : question.jp;
-    const optionButtons = document.querySelectorAll("#options button");
+function checkAnswer(answer) {
+    const questionElement = document.getElementById("question");
+    const questionText = questionElement.textContent;
+    const questionIndex = testConfig[currentTest].getEntryByQuestion(data[testConfig[currentTest].getDictionary()], questionText);
+    const question = data[testConfig[currentTest].getDictionary()][questionIndex];
+    const correctAnswer = testConfig[currentTest].getAnswer(question).toLowerCase(); // Приводим к нижнему регистру
+    const userAnswer = answer.trim().toLowerCase(); // Приводим к нижнему регистру
+    const optionButtons = document.querySelectorAll("#answerOptions button");
+    const answerInput = document.getElementById("answerInput");
 
     if (mode === "closed") {
         optionButtons.forEach(button => {
-            if (button.textContent === correctAnswer) {
+            if (button.textContent.toLowerCase() === correctAnswer) { // Игнорируем регистр
                 button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
             }
-            if (button.textContent === answer) {
-                if (answer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
-                    if (!question.answered) {
-                        correctCount++;
-                        question.answered = true;
-                    }
+            if (button.textContent.toLowerCase() === userAnswer) { // Игнорируем регистр
+                if (userAnswer === correctAnswer) {
+                    correctCount++;
                     document.getElementById("status").textContent = "Правильно!";
-                    document.getElementById("answerInput").style.backgroundColor = "rgba(128, 255, 128, 0.5)";
                     button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
                 } else {
-                    if (!question.answered) {
-                        incorrectCount++;
-                        question.answered = true;
-                    }
+                    incorrectCount++;
                     document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
-                    document.getElementById("answerInput").style.backgroundColor = "rgba(255, 128, 128, 0.5)";
                     button.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Красный
                 }
             }
             button.disabled = true;
         });
     } else {
-        if (answer.trim().toLowerCase() === correctAnswer.toLowerCase()) {
-            if (!question.answered) {
-                correctCount++;
-                question.answered = true;
-            }
+        if (userAnswer === correctAnswer) { // Сравниваем с учетом нижнего регистра
+            correctCount++;
             document.getElementById("status").textContent = "Правильно!";
-            document.getElementById("answerInput").style.backgroundColor = "rgba(128, 255, 128, 0.5)";
+            answerInput.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
         } else {
-            if (!question.answered) {
-                incorrectCount++;
-                question.answered = true;
-            }
+            incorrectCount++;
             document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
-            document.getElementById("answerInput").style.backgroundColor = "rgba(255, 128, 128, 0.5)";
+            answerInput.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Красный
         }
     }
 
-    updateCounters();
+    updateScore();
 
     setTimeout(() => {
-        optionButtons.forEach(button => {
-            button.style.backgroundColor = "";
-            button.disabled = false;
-        });
+        // Сбрасываем стили и очищаем поле ввода
+        if (mode === "closed") {
+            optionButtons.forEach(button => {
+                button.style.backgroundColor = "";
+                button.disabled = false;
+            });
+        } else {
+            answerInput.style.backgroundColor = ""; // Сбрасываем цвет поля ввода
+            answerInput.value = ""; // Очищаем поле ввода
+        }
         document.getElementById("status").textContent = "";
-        document.getElementById("answerInput").value = "";
-        document.getElementById("answerInput").style.backgroundColor = "";
         loadQuestion();
     }, 1000);
 }
 
-function resetQuestions() {
-    data[currentTest].forEach(q => q.answered = false);
+function updateScore() {
+    document.getElementById("correctCountDisplay").textContent = correctCount;
+    document.getElementById("incorrectCountDisplay").textContent = incorrectCount;
 }
+
+function resetQuestions() {
+    questions = testConfig[currentTest].filterQuestions(getCurrentDictionaryData(), selectedCategories);
+}
+
+document.getElementById("submitAnswer").addEventListener("click", () => {
+    checkAnswer(document.getElementById("answerInput").value);
+});
+
+document.getElementById("endTest").addEventListener("click", () => {
+    document.getElementById("testContainer").style.display = "none";
+    document.getElementById("testSelection").style.display = "block";
+});
+
 
 function endTest() {
     resetQuestions();
@@ -211,12 +288,9 @@ function shuffle(array) {
     return array;
 }
 
-function updateCounters() {
-    document.getElementById("correctCountDisplay").textContent = correctCount;
-    document.getElementById("incorrectCountDisplay").textContent = incorrectCount;
-}
 
-document.getElementById("endTest").addEventListener("click", endTest);
+
+//document.getElementById("endTest").addEventListener("click", endTest);
 
 
 // Автотест для проверки, что вопросы не повторяются подряд
