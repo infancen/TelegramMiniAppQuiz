@@ -44,7 +44,35 @@ const testConfig = {
 document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch("data.json");
     data = await response.json();
+
+    // Добавляем обработчик для input
+    document.getElementById("answerInput").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault(); // Предотвращаем стандартное поведение
+
+            const inputValue = document.getElementById("answerInput").value.trim();
+            if (inputValue === "") {
+                // Если поле ввода пустое, показываем сообщение или просто игнорируем
+                alert("Поле ввода не может быть пустым!");
+                return;
+            }
+
+            checkAnswer(inputValue); // Вызываем checkAnswer с текущим значением input
+        }
+    });
+
+    focusOnInput();
 });
+
+function focusOnInput() {
+     // Автоматически фокусируемся на поле ввода для мобильных устройств
+     if (/Mobi|Android/i.test(navigator.userAgent)) {
+        const answerInput = document.getElementById("answerInput");
+        if (answerInput.style.display !== "none") {
+            answerInput.focus(); // Фокусируемся на поле ввода
+        }
+    }
+}
 
 function getCurrentDictionaryData() {
     return data[testConfig[currentTest].getDictionary()];
@@ -190,12 +218,6 @@ function checkAnswer(answer) {
         });
         document.getElementById("status").textContent = "";
         document.getElementById("answerInput").value = "";
-        loadQuestion();
-    }, 1000);(() => {
-        optionButtons.forEach(button => {
-            button.style.backgroundColor = "";
-            button.disabled = false;
-        });
         loadQuestion();
     }, 1000);
 }
