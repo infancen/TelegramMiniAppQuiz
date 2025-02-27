@@ -46,6 +46,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     data = await response.json();
 });
 
+function getCurrentDictionaryData() {
+    return data[testConfig[currentTest].getDictionary()];
+}
+
+function getCurrentEntry() {
+    return getCurrentDictionaryData().findIndex(q => q.jp === question || q.ru === question);
+}
+
 function populateCategories() {
     const categorySelect = document.getElementById("categorySelect");
     categorySelect.innerHTML = "";
@@ -74,7 +82,7 @@ function startTest() {
     direction = document.querySelector("input[name='direction']:checked").value;
     mode = document.querySelector("input[name='modeSelect']:checked").value;
 
-    questions = testConfig[currentTest].filterQuestions(data[testConfig[currentTest].getDictionary()], selectedCategories);
+    resetQuestions();
 
     if (questions.length === 0) {
         alert("Нет вопросов в выбранных категориях");
@@ -95,7 +103,6 @@ function startTest() {
 function loadQuestion() {
     if (questions.length === 0) {
         resetQuestions();
-        questions = testConfig[currentTest].filterQuestions(data[currentTest.getDictionary()], selectedCategories);
     }
 
     if (questions.length > 1 && lastQuestion) {
@@ -199,7 +206,7 @@ function updateScore() {
 }
 
 function resetQuestions() {
-    data[currentTest.getDictionary()].forEach(q => q.answered = false);
+    questions = testConfig[currentTest].filterQuestions(getCurrentDictionaryData(), selectedCategories);
 }
 
 document.getElementById("submitAnswer").addEventListener("click", () => {
