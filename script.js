@@ -11,20 +11,29 @@ let incorrectCount = 0;
 
 const testConfig = {
     hiragana: {
-        getQuestion: (entry) => entry.jp,
-        getAnswer: (entry) => entry.ru,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c)))
+        getQuestion: (entry) => direction === "jp-ru" ? entry.jp : entry.ru,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.ru : entry.jp,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
+        getDictionary: () => "hiragana"
     },
     katakana: {
         getQuestion: (entry) => entry.jp,
         getAnswer: (entry) => entry.ru,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c)))
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
+        getDictionary: () => "katakana"
     },
-    numbers: {
-        getQuestion: (entry) => direction === "jp-ru" ? entry.kanji : entry.arabic,
-        getAnswer: (entry) => direction === "jp-ru" ? entry.jp_reading : entry.ru_reading,
-        filterQuestions: (data, categories) => data
-    }
+    numbersTranslit: {
+        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.ru_reading,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.ru_reading : entry.number,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все") || q.categories.some(c => categories.includes(c))),
+        getDictionary: () => "numbers"
+    },
+    numbersHiragana: {
+        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.jp_reading,
+        getAnswer: (entry) => direction === "jp-ru" ? entry.jp_reading : entry.number,
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все") || q.categories.some(c => categories.includes(c))),
+        getDictionary: () => "numbers"
+    },
 };
 
 // Загрузка данных и категорий
@@ -37,9 +46,9 @@ function populateCategories() {
     const categorySelect = document.getElementById("categorySelect");
     categorySelect.innerHTML = "";
     
-    if (currentTest && data[currentTest]) {
+    if (currentTest && data[testConfig[currentTest].getDictionary()]) {
         const allCategories = new Set();
-        data[currentTest].forEach(entry => {
+        data[testConfig[currentTest].getDictionary()].forEach(entry => {
             if (entry.categories) {
                 entry.categories.forEach(cat => allCategories.add(cat));
             }
@@ -61,7 +70,7 @@ function startTest() {
     direction = document.querySelector("input[name='direction']:checked").value;
     mode = document.querySelector("input[name='modeSelect']:checked").value;
 
-    questions = testConfig[currentTest].filterQuestions(data[currentTest], selectedCategories);
+    questions = testConfig[currentTest].filterQuestions(data[testConfig[currentTest].getDictionary()], selectedCategories);
 
     if (questions.length === 0) {
         alert("Нет вопросов в выбранных категориях");
@@ -82,7 +91,7 @@ function startTest() {
 function loadQuestion() {
     if (questions.length === 0) {
         resetQuestions();
-        questions = testConfig[currentTest].filterQuestions(data[currentTest], selectedCategories);
+        questions = testConfig[currentTest].filterQuestions(data[currentTest.getDictionary()], selectedCategories);
     }
 
     if (questions.length > 1 && lastQuestion) {
@@ -107,7 +116,7 @@ function populateAnswerOptions() {
     const answerContainer = document.getElementById("answerOptions");
     answerContainer.innerHTML = "";
     
-    let allAnswers = data[currentTest].map(entry => testConfig[currentTest].getAnswer(entry));
+    let allAnswers = data[testConfig[currentTest].getDictionary()].map(entry => testConfig[currentTest].getAnswer(entry));
     let uniqueAnswers = [...new Set(allAnswers)];
     let correctAnswer = testConfig[currentTest].getAnswer(question);
     
@@ -141,7 +150,7 @@ function updateScore() {
 }
 
 function resetQuestions() {
-    data[currentTest].forEach(q => q.answered = false);
+    data[currentTest.getDictionary()].forEach(q => q.answered = false);
 }
 
 document.getElementById("submitAnswer").addEventListener("click", () => {
