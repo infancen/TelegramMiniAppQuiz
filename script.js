@@ -127,7 +127,7 @@ function populateAnswerOptions() {
     const answerContainer = document.getElementById("answerOptions");
     answerContainer.innerHTML = "";
     
-    let allAnswers = data[testConfig[currentTest].getDictionary()].map(entry => testConfig[currentTest].getAnswer(entry));
+    let allAnswers = getCurrentDictionaryData().filter(q => q.categories.some(c => selectedCategories.includes(c))).map(q => testConfig[currentTest].getAnswer(q));;
     let uniqueAnswers = [...new Set(allAnswers)];
     let correctAnswer = testConfig[currentTest].getAnswer(question);
     
