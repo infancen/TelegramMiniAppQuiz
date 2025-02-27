@@ -12,6 +12,7 @@
         <h1>Выберите тест</h1>
         <button onclick="selectTest('hiragana')">Хирагана</button>
         <button onclick="selectTest('katakana')">Катакана</button>
+        <button onclick="selectTest('numbers')">Числа</button>
     </div>
     
     <div id="setupScreen" style="display: none;">
@@ -45,7 +46,7 @@
     
     <div id="testContainer" style="display: none;">
         <h1 id="question"></h1>
-        <div id="options"></div>
+        <div id="answerOptions"></div>
         <input type="text" id="answerInput" style="display: none;">
         <button id="submitAnswer" style="display: none;" >Ответить</button>
         <p id="status"></p>

@@ -240,5 +240,36 @@
         { "jp": "ピャ", "ru": "пя", "categories": ["Ёон"] },
         { "jp": "ピュ", "ru": "пю", "categories": ["Ёон"] },
         { "jp": "ピョ", "ru": "пё", "categories": ["Ёон"] }
-    ]
+    ],
+
+    "numbers": [
+    { "number": "1", "jp": "一", "jp_reading": "いち", "ru_reading": "Ити", "categories": ["Числа"] },
+    { "number": "2", "jp": "二", "jp_reading": "に", "ru_reading": "Ни", "categories": ["Числа"] },
+    { "number": "3", "jp": "三", "jp_reading": "さん", "ru_reading": "Сан", "categories": ["Числа"] },
+    { "number": "4", "jp": "四", "jp_reading": "し/よん", "ru_reading": "Си/Ён", "categories": ["Числа"] },
+    { "number": "5", "jp": "五", "jp_reading": "ご", "ru_reading": "Го", "categories": ["Числа"] },
+    { "number": "6", "jp": "六", "jp_reading": "ろく", "ru_reading": "Року", "categories": ["Числа"] },
+    { "number": "7", "jp": "七", "jp_reading": "しち/なな", "ru_reading": "Сити/Нана", "categories": ["Числа"] },
+    { "number": "8", "jp": "八", "jp_reading": "はち", "ru_reading": "Хати", "categories": ["Числа"] },
+    { "number": "9", "jp": "九", "jp_reading": "きゅう/く", "ru_reading": "Кю:/Ку", "categories": ["Числа"] },
+    { "number": "10", "jp": "十", "jp_reading": "じゅう", "ru_reading": "Дзю:", "categories": ["Числа"] },
+    { "number": "20", "jp": "二十", "jp_reading": "にじゅう", "ru_reading": "Ни-дзю:", "categories": ["Числа"] },
+    { "number": "30", "jp": "三十", "jp_reading": "さんじゅう", "ru_reading": "Сан-дзю:", "categories": ["Числа"] },
+    { "number": "40", "jp": "四十", "jp_reading": "よんじゅう", "ru_reading": "Ён-дзю:", "categories": ["Числа"] },
+    { "number": "50", "jp": "五十", "jp_reading": "ごじゅう", "ru_reading": "Го-дзю:", "categories": ["Числа"] },
+    { "number": "60", "jp": "六十", "jp_reading": "ろくじゅう", "ru_reading": "Року-дзю:", "categories": ["Числа"] },
+    { "number": "70", "jp": "七十", "jp_reading": "ななじゅう", "ru_reading": "Нана-дзю:", "categories": ["Числа"] },
+    { "number": "80", "jp": "八十", "jp_reading": "はちじゅう", "ru_reading": "Хати-дзю:", "categories": ["Числа"] },
+    { "number": "90", "jp": "九十", "jp_reading": "きゅうじゅう", "ru_reading": "Кю:-дзю:", "categories": ["Числа"] },
+    { "number": "100", "jp": "百", "jp_reading": "ひゃく", "ru_reading": "Хяку", "categories": ["Числа"] },
+    { "number": "200", "jp": "二百", "jp_reading": "にひゃく", "ru_reading": "Ни-хяку", "categories": ["Числа"] },
+    { "number": "300", "jp": "三百", "jp_reading": "さんびゃく", "ru_reading": "Сам-бяку", "categories": ["Числа"] },
+    { "number": "400", "jp": "四百", "jp_reading": "よんひゃく", "ru_reading": "Ён-хяку", "categories": ["Числа"] },
+    { "number": "500", "jp": "五百", "jp_reading": "ごひゃく", "ru_reading": "Го-хяку", "categories": ["Числа"] },
+    { "number": "600", "jp": "六百", "jp_reading": "ろっぴゃく", "ru_reading": "Роп-пяку", "categories": ["Числа"] },
+    { "number": "700", "jp": "七百", "jp_reading": "ななひゃく", "ru_reading": "Нана-хяку", "categories": ["Числа"] },
+    { "number": "800", "jp": "八百", "jp_reading": "はっぴゃく", "ru_reading": "Хап-пяку", "categories": ["Числа"] },
+    { "number": "900", "jp": "九百", "jp_reading": "きゅうひゃく", "ru_reading": "Кю:-хяку", "categories": ["Числа"] },
+    { "number": "1000", "jp": "千", "jp_reading": "せん", "ru_reading": "Сэн", "categories": ["Числа"] }
+]
 }
