@@ -15,28 +15,32 @@ const testConfig = {
         getAnswer: (entry) => direction === "jp-ru" ? entry.ru : entry.jp,
         filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
         getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
-        getDictionary: () => "hiragana"
+        getDictionary: () => "hiragana",
+        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
     },
     katakana: {
         getQuestion: (entry) => entry.jp,
         getAnswer: (entry) => entry.ru,
         filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
         getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
-        getDictionary: () => "katakana"
+        getDictionary: () => "katakana",
+        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
     },
     numbersTranslit: {
         getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.ru_reading,
         getAnswer: (entry) => direction === "jp-ru" ? entry.ru_reading : entry.number,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все") || q.categories.some(c => categories.includes(c))),
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
         getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.ru_reading === question),
-        getDictionary: () => "numbers"
+        getDictionary: () => "numbers",
+        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
     },
     numbersHiragana: {
         getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.jp_reading,
         getAnswer: (entry) => direction === "jp-ru" ? entry.jp_reading : entry.number,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все") || q.categories.some(c => categories.includes(c))),
+        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
         getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.jp_reading === question),
-        getDictionary: () => "numbers"
+        getDictionary: () => "numbers",
+        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
     },
 };
 
@@ -84,17 +88,24 @@ function getCurrentEntry() {
 
 function populateCategories() {
     const categorySelect = document.getElementById("categorySelect");
-    categorySelect.innerHTML = "";
+    categorySelect.innerHTML = ""; // Очищаем список
     
     if (currentTest && data[testConfig[currentTest].getDictionary()]) {
         const allCategories = new Set();
+        
+        // Добавляем вариант "Все звуки" или "Все цифры" первым элементом
+        const allOption = testConfig[currentTest].getAllOption();
+        categorySelect.innerHTML += `<option value="${allOption}">${allOption}</option>`;
+        
+        // Собираем остальные категории
         data[testConfig[currentTest].getDictionary()].forEach(entry => {
             if (entry.categories) {
                 entry.categories.forEach(cat => allCategories.add(cat));
             }
         });
         
-        categorySelect.innerHTML = Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        // Добавляем остальные категории в список
+        categorySelect.innerHTML += Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
     }
 }
 
@@ -155,7 +166,17 @@ function populateAnswerOptions() {
     const answerContainer = document.getElementById("answerOptions");
     answerContainer.innerHTML = "";
     
-    let allAnswers = getCurrentDictionaryData().filter(q => q.categories.some(c => selectedCategories.includes(c))).map(q => testConfig[currentTest].getAnswer(q));;
+    let allAnswers;
+    if (selectedCategories.includes(testConfig[currentTest].getAllOption())) {
+        // Если выбрана категория "Все звуки" или "Все цифры", берем все ответы из словаря
+        allAnswers = getCurrentDictionaryData().map(q => testConfig[currentTest].getAnswer(q));
+    } else {
+        // Иначе фильтруем ответы по выбранным категориям
+        allAnswers = getCurrentDictionaryData()
+            .filter(q => q.categories.some(c => selectedCategories.includes(c)))
+            .map(q => testConfig[currentTest].getAnswer(q));
+    }
+
     let uniqueAnswers = [...new Set(allAnswers)];
     let correctAnswer = testConfig[currentTest].getAnswer(question);
     
