@@ -175,19 +175,20 @@ function populateAnswerOptions() {
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
     const questionText = questionElement.textContent;
-    //const questionIndex = data[testConfig[currentTest].getDictionary()].findIndex(q => q.jp === questionElement.textContent || q.ru === questionElement.textContent);
     const questionIndex = testConfig[currentTest].getEntryByQuestion(data[testConfig[currentTest].getDictionary()], questionText);
     const question = data[testConfig[currentTest].getDictionary()][questionIndex];
-    const correctAnswer = testConfig[currentTest].getAnswer(question);
+    const correctAnswer = testConfig[currentTest].getAnswer(question).toLowerCase(); // Приводим к нижнему регистру
+    const userAnswer = answer.trim().toLowerCase(); // Приводим к нижнему регистру
     const optionButtons = document.querySelectorAll("#answerOptions button");
+    const answerInput = document.getElementById("answerInput");
 
     if (mode === "closed") {
         optionButtons.forEach(button => {
-            if (button.textContent === correctAnswer) {
+            if (button.textContent.toLowerCase() === correctAnswer) { // Игнорируем регистр
                 button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
             }
-            if (button.textContent === answer) {
-                if (answer.trim() === correctAnswer) {
+            if (button.textContent.toLowerCase() === userAnswer) { // Игнорируем регистр
+                if (userAnswer === correctAnswer) {
                     correctCount++;
                     document.getElementById("status").textContent = "Правильно!";
                     button.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
@@ -200,24 +201,31 @@ function checkAnswer(answer) {
             button.disabled = true;
         });
     } else {
-        if (answer.trim() === correctAnswer) {
+        if (userAnswer === correctAnswer) { // Сравниваем с учетом нижнего регистра
             correctCount++;
             document.getElementById("status").textContent = "Правильно!";
+            answerInput.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
         } else {
             incorrectCount++;
             document.getElementById("status").textContent = `Неправильно. Правильный ответ: ${correctAnswer}`;
+            answerInput.style.backgroundColor = "rgba(255, 128, 128, 0.5)"; // Красный
         }
     }
 
     updateScore();
 
     setTimeout(() => {
-        optionButtons.forEach(button => {
-            button.style.backgroundColor = "";
-            button.disabled = false;
-        });
+        // Сбрасываем стили и очищаем поле ввода
+        if (mode === "closed") {
+            optionButtons.forEach(button => {
+                button.style.backgroundColor = "";
+                button.disabled = false;
+            });
+        } else {
+            answerInput.style.backgroundColor = ""; // Сбрасываем цвет поля ввода
+            answerInput.value = ""; // Очищаем поле ввода
+        }
         document.getElementById("status").textContent = "";
-        document.getElementById("answerInput").value = "";
         loadQuestion();
     }, 1000);
 }
