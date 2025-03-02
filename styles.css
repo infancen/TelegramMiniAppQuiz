@@ -42,3 +42,36 @@ input, select {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* Специфичный стиль для радио-кнопок */
+input[type="radio"] {
+    width: auto;
+    margin: 0 10px 0 0;
+    padding: 0;
+}
+
+/* Стили для радио-групп */
+.radio-group {
+    width: 100%;
+    max-width: 300px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.radio-group label {
+    display: flex;
+    align-items: center; /* Выравнивание радио-кнопки и текста по центру */
+    margin: 5px 0; /* Отступ между вариантами */
+    font-size: 16px;
+}
+
+/* Стиль для кнопки "Выйти ко всем тестам" */
+#setupScreen button[onclick="startTest()"] {
+    margin-top: 20px; /* Отступ сверху */
+}
+
+/* Стиль для кнопки "Выйти ко всем тестам" */
+#setupScreen button[onclick="exitToTestSelection()"] {
+    margin-top: 20px; /* Отступ сверху */
+}
