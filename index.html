@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Тест по японскому языку</title>
     <link rel="stylesheet" href="styles.css">
+    <script defer src="config.js"></script>
     <script defer src="script.js"></script>
 </head>
 <body>
@@ -12,8 +13,7 @@
         <h1>Выберите тест</h1>
         <button onclick="selectTest('hiragana')">Хирагана</button>
         <button onclick="selectTest('katakana')">Катакана</button>
-        <button onclick="selectTest('numbersTranslit')">Числа - кириллица транслитом</button>
-        <button onclick="selectTest('numbersHiragana')">Числа - фуригана</button>
+        <button onclick="selectTest('numbers')">Числа</button>
     </div>
     
     <div id="setupScreen" style="display: none;">
@@ -23,26 +23,30 @@
         </select>
         
         <h2>Направление перевода</h2>
-        <div class="radio-group">
-            <label><input type="radio" name="direction" value="jp-ru" checked> Японский → Русский</label>
-            <label><input type="radio" name="direction" value="ru-jp"> Русский → Японский</label>
+        <div id="directionContainer">
+            <div class="direction-group">
+                <label for="fromFormat">Из:</label>
+                <select id="fromFormat"></select>
+            </div>
+            <div class="direction-group">
+                <label for="toFormat">В:</label>
+                <select id="toFormat"></select>
+            </div>
         </div>
         
         <h2>Режим</h2>
-        <div class="radio-group">
-            <label><input type="radio" name="modeSelect" value="closed" checked> Закрытый</label>
-            <label><input type="radio" name="modeSelect" value="open"> Открытый</label>
+        <div id="modeRadioGroup" class="radio-group">
         </div>
         
         <button onclick="startTest()">Начать тест</button>
-        <button onclick="exitToTestSelection()">Выйти ко всем тестам</button> <!-- Новая кнопка -->
+        <button onclick="exitToTestSelection()">Выйти ко всем тестам</button>
     </div>
     
     <div id="testContainer" style="display: none;">
         <h1 id="question"></h1>
         <div id="answerOptions"></div>
         <input type="text" id="answerInput" style="display: none;">
-        <button id="submitAnswer" style="display: none;" >Ответить</button>
+        <button id="submitAnswer" style="display: none;">Ответить</button>
         <p id="status"></p>
         <div>
             <span>Правильные ответы: </span>
