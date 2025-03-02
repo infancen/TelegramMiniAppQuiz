@@ -288,7 +288,12 @@
     { "number": "70000", "jp": "七万", "jp_reading": "ななまん", "ru_reading": "Нана-ман", "categories": ["Десятки тысяч"] },
     { "number": "80000", "jp": "八万", "jp_reading": "はちまん", "ru_reading": "Хати-ман", "categories": ["Десятки тысяч"] },
     { "number": "90000", "jp": "九万", "jp_reading": "きゅうまん", "ru_reading": "Кю:-ман", "categories": ["Десятки тысяч"] },
-    { "number": "100000", "jp": "十万", "jp_reading": "じゅうまん", "ru_reading": "Дзю:-ман", "categories": ["Сотни тысяч"] },
-    { "number": "1000000", "jp": "百万", "jp_reading": "ひゃくまん", "ru_reading": "Хяку-ман", "categories": ["Миллионы"] }
+    { "number": "100000", "jp": "十万", "jp_reading": "じゅうまん", "ru_reading": "Дзю:-ман", "categories": ["Большие числа"] },
+    { "number": "1000000", "jp": "百万", "jp_reading": "ひゃくまん", "ru_reading": "Хяку-ман", "categories": ["Большие числа"] },
+    { "number": "10000000", "jp": "千万", "jp_reading": "せんまん", "ru_reading": "Сэн-ман", "categories": ["Большие числа"] },
+    { "number": "100000000", "jp": "億", "jp_reading": "おく", "ru_reading": "Оку", "categories": ["Большие числа"] },
+    { "number": "1000000000", "jp": "十億", "jp_reading": "じゅうおく", "ru_reading": "Дзю:-оку", "categories": ["Большие числа"] },
+    { "number": "10000000000", "jp": "百億", "jp_reading": "ひゃくおく", "ru_reading": "Хяку-оку", "categories": ["Большие числа"] },
+    { "number": "100000000000", "jp": "千億", "jp_reading": "せんおく", "ru_reading": "Сэн-оку", "categories": ["Большие числа"] }
 ]
 }
