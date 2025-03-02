@@ -304,11 +304,6 @@ function shuffle(array) {
     return array;
 }
 
-
-
-//document.getElementById("endTest").addEventListener("click", endTest);
-
-
 // Автотест для проверки, что вопросы не повторяются подряд
 function autoTestNoConsecutiveRepeats() {
     const iterations = 1000;
