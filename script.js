@@ -106,6 +106,11 @@ function populateCategories() {
         
         // Добавляем остальные категории в список
         categorySelect.innerHTML += Array.from(allCategories).map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        
+        // Выбираем первую категорию автоматически
+        if (categorySelect.options.length > 0) {
+            categorySelect.options[0].selected = true;
+        }
     }
 }
 
