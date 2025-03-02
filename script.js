@@ -270,10 +270,21 @@ document.getElementById("submitAnswer").addEventListener("click", () => {
     checkAnswer(document.getElementById("answerInput").value);
 });
 
-document.getElementById("endTest").addEventListener("click", () => {
+// Функция для завершения теста и возврата в настройки
+document.getElementById("endTest").addEventListener("click", function() {
+    // Скрываем контейнер теста
     document.getElementById("testContainer").style.display = "none";
-    document.getElementById("testSelection").style.display = "block";
+    // Показываем настройки теста
+    document.getElementById("setupScreen").style.display = "block";
 });
+
+// Функция для выхода ко всем тестам
+function exitToTestSelection() {
+    // Скрываем настройки теста
+    document.getElementById("setupScreen").style.display = "none";
+    // Показываем выбор теста
+    document.getElementById("testSelection").style.display = "block";
+}
 
 
 function endTest() {
