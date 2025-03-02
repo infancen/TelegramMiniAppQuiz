@@ -20,27 +20,19 @@
         <h1>Настройки теста</h1>
         <label for="categorySelect">Категория:</label>
         <select id="categorySelect" multiple>
-            <option value="Все звуки">Все звуки</option>
-            <option value="Базовые">Базовые</option>
-            <option value="Нигори и Мару">Нигори и Мару</option>
-            <option value="Ёон">Ёон</option>
-            <option value="Гласные">Гласные</option>
-            <option value="Ряд К">Ряд К</option>
-            <option value="Ряд С">Ряд С</option>
-            <option value="Ряд Т">Ряд Т</option>
-            <option value="Ряд Н">Ряд Н</option>
-            <option value="Ряд Х">Ряд Х</option>
-            <option value="Ряд М">Ряд М</option>
-            <option value="Ряд Р">Ряд Р</option>
         </select>
         
         <h2>Направление перевода</h2>
-        <label><input type="radio" name="direction" value="jp-ru" checked> Японский → Русский</label>
-        <label><input type="radio" name="direction" value="ru-jp"> Русский → Японский</label>
+        <div class="radio-group">
+            <label><input type="radio" name="direction" value="jp-ru" checked> Японский → Русский</label>
+            <label><input type="radio" name="direction" value="ru-jp"> Русский → Японский</label>
+        </div>
         
         <h2>Режим</h2>
-        <label><input type="radio" name="modeSelect" value="closed" checked> Закрытый</label>
-        <label><input type="radio" name="modeSelect" value="open"> Открытый</label>
+        <div class="radio-group">
+            <label><input type="radio" name="modeSelect" value="closed" checked> Закрытый</label>
+            <label><input type="radio" name="modeSelect" value="open"> Открытый</label>
+        </div>
         
         <button onclick="startTest()">Начать тест</button>
     </div>
