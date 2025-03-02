@@ -9,41 +9,6 @@ let question;
 let correctCount = 0;
 let incorrectCount = 0;
 
-const testConfig = {
-    hiragana: {
-        getQuestion: (entry) => direction === "jp-ru" ? entry.jp : entry.ru,
-        getAnswer: (entry) => direction === "jp-ru" ? entry.ru : entry.jp,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
-        getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
-        getDictionary: () => "hiragana",
-        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
-    },
-    katakana: {
-        getQuestion: (entry) => entry.jp,
-        getAnswer: (entry) => entry.ru,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все звуки") || q.categories.some(c => categories.includes(c))),
-        getEntryByQuestion: (data, question) => data.findIndex(q => q.jp === question || q.ru === question),
-        getDictionary: () => "katakana",
-        getAllOption: () => "Все звуки" // Добавляем метод для выбора всех вариантов
-    },
-    numbersTranslit: {
-        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.ru_reading,
-        getAnswer: (entry) => direction === "jp-ru" ? entry.ru_reading : entry.number,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
-        getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.ru_reading === question),
-        getDictionary: () => "numbers",
-        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
-    },
-    numbersHiragana: {
-        getQuestion: (entry) => direction === "jp-ru" ? entry.number : entry.jp_reading,
-        getAnswer: (entry) => direction === "jp-ru" ? entry.jp_reading : entry.number,
-        filterQuestions: (data, categories) => data.filter(q => categories.includes("Все цифры") || q.categories.some(c => categories.includes(c))),
-        getEntryByQuestion: (data, question) => data.findIndex(q => q.number === question || q.jp_reading === question),
-        getDictionary: () => "numbers",
-        getAllOption: () => "Все цифры" // Добавляем метод для выбора всех вариантов
-    },
-};
-
 // Загрузка данных и категорий
 document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch("data.json");
@@ -69,8 +34,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 function focusOnInput() {
-     // Автоматически фокусируемся на поле ввода для мобильных устройств
-     if (/Mobi|Android/i.test(navigator.userAgent)) {
+    // Автоматически фокусируемся на поле ввода для мобильных устройств
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
         const answerInput = document.getElementById("answerInput");
         if (answerInput.style.display !== "none") {
             answerInput.focus(); // Фокусируемся на поле ввода
@@ -79,26 +44,26 @@ function focusOnInput() {
 }
 
 function getCurrentDictionaryData() {
-    return data[testConfig[currentTest].getDictionary()];
+    return data[currentTest];
 }
 
 function getCurrentEntry() {
-    return getCurrentDictionaryData().findIndex(q => q.jp === question || q.ru === question);
+    return getCurrentDictionaryData().findIndex(q => Object.values(q).includes(question));
 }
 
 function populateCategories() {
     const categorySelect = document.getElementById("categorySelect");
     categorySelect.innerHTML = ""; // Очищаем список
     
-    if (currentTest && data[testConfig[currentTest].getDictionary()]) {
+    if (currentTest && data[currentTest]) {
         const allCategories = new Set();
         
         // Добавляем вариант "Все звуки" или "Все цифры" первым элементом
-        const allOption = testConfig[currentTest].getAllOption();
+        const allOption = testConfig[currentTest].allOption;
         categorySelect.innerHTML += `<option value="${allOption}">${allOption}</option>`;
         
         // Собираем остальные категории
-        data[testConfig[currentTest].getDictionary()].forEach(entry => {
+        data[currentTest].forEach(entry => {
             if (entry.categories) {
                 entry.categories.forEach(cat => allCategories.add(cat));
             }
@@ -114,17 +79,84 @@ function populateCategories() {
     }
 }
 
+function populateDirectionRadioGroup() {
+    const directionRadioGroup = document.getElementById("directionRadioGroup");
+    directionRadioGroup.innerHTML = ""; // Очищаем группу
+
+    // Получаем поля для вопросов и ответов из конфигурации
+    const questionFields = testConfig[currentTest].questionFields;
+    const answerFields = testConfig[currentTest].answerFields;
+    const fieldLabels = testConfig[currentTest].fieldLabels; // Маппинг полей
+
+    // Создаём направления на основе полей
+    const directions = [];
+    questionFields.forEach((qField, index) => {
+        const aField = answerFields[index];
+        directions.push({
+            value: `${qField}-${aField}`,
+            label: `${fieldLabels[qField]} → ${fieldLabels[aField]}` // Используем понятные названия
+        });
+    });
+
+    // Добавляем радио-кнопки в группу
+    directions.forEach(dir => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "direction";
+        input.value = dir.value;
+        if (dir.value === directions[0].value) input.checked = true; // По умолчанию выбран первый вариант
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(dir.label));
+        directionRadioGroup.appendChild(label);
+    });
+}
+
+function populateModeRadioGroup() {
+    const modeRadioGroup = document.getElementById("modeRadioGroup");
+    modeRadioGroup.innerHTML = ""; // Очищаем группу
+
+    const modes = testConfig[currentTest].modes;
+    const modeLabels = {
+        closed: "Закрытый",
+        open: "Открытый"
+    };
+
+    modes.forEach(mode => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "modeSelect";
+        input.value = mode;
+        if (mode === "closed") input.checked = true; // По умолчанию выбран первый вариант
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(modeLabels[mode]));
+        modeRadioGroup.appendChild(label);
+    });
+}
+
 function selectTest(testType) {
     currentTest = testType;
     document.getElementById("testSelection").style.display = "none";
     document.getElementById("setupScreen").style.display = "block";
+
     populateCategories();
+    populateFromToFormats();
+    populateModeRadioGroup();
 }
 
 function startTest() {
+    if (!validateFromToFormats()) {
+        return;
+    }
+
     selectedCategories = Array.from(document.getElementById("categorySelect").selectedOptions).map(opt => opt.value);
-    direction = document.querySelector("input[name='direction']:checked").value;
     mode = document.querySelector("input[name='modeSelect']:checked").value;
+
+    // Получаем выбранные форматы
+    const fromFormat = document.getElementById("fromFormat").value;
+    const toFormat = document.getElementById("toFormat").value;
+    direction = `${fromFormat}-${toFormat}`; // Формируем направление
 
     resetQuestions();
 
@@ -158,7 +190,11 @@ function loadQuestion() {
         question = questions.splice(Math.floor(Math.random() * questions.length), 1)[0];
         lastQuestion = question;
 
-        document.getElementById("question").textContent = testConfig[currentTest].getQuestion(question);
+        // Получаем выбранный формат "из"
+        const fromFormat = document.getElementById("fromFormat").value;
+
+        // Формируем вопрос на основе выбранного формата
+        document.getElementById("question").textContent = question[fromFormat];
 
         if (mode === "closed") {
             populateAnswerOptions();
@@ -168,29 +204,103 @@ function loadQuestion() {
     }
 }
 
+function populateFromToFormats() {
+    const fromFormat = document.getElementById("fromFormat");
+    const toFormat = document.getElementById("toFormat");
+    fromFormat.innerHTML = ""; // Очищаем списки
+    toFormat.innerHTML = "";
+
+    // Получаем поля для вопросов и ответов из конфигурации
+    const questionFields = testConfig[currentTest].questionFields;
+    const fieldLabels = testConfig[currentTest].fieldLabels; // Маппинг полей
+
+    // Заполняем списки
+    questionFields.forEach(field => {
+        const option = document.createElement("option");
+        option.value = field;
+        option.textContent = fieldLabels[field];
+        fromFormat.appendChild(option.cloneNode(true)); // Клонируем для второго списка
+        toFormat.appendChild(option);
+    });
+
+    // Устанавливаем начальные значения
+    fromFormat.value = questionFields[0];
+    toFormat.value = questionFields[1];
+
+    // Добавляем обработчики событий для автоматического изменения значений
+    fromFormat.addEventListener("change", () => adjustToFormat());
+    toFormat.addEventListener("change", () => adjustFromFormat());
+}
+
+// Функция для автоматической подмены значения в списке "в"
+function adjustToFormat() {
+    const fromFormat = document.getElementById("fromFormat");
+    const toFormat = document.getElementById("toFormat");
+
+    if (fromFormat.value === toFormat.value) {
+        // Если значения совпадают, выбираем следующее доступное значение
+        const availableOptions = Array.from(toFormat.options).map(opt => opt.value);
+        const nextOption = availableOptions.find(opt => opt !== fromFormat.value);
+        toFormat.value = nextOption;
+    }
+}
+
+// Функция для автоматической подмены значения в списке "из"
+function adjustFromFormat() {
+    const fromFormat = document.getElementById("fromFormat");
+    const toFormat = document.getElementById("toFormat");
+
+    if (fromFormat.value === toFormat.value) {
+        // Если значения совпадают, выбираем следующее доступное значение
+        const availableOptions = Array.from(fromFormat.options).map(opt => opt.value);
+        const nextOption = availableOptions.find(opt => opt !== toFormat.value);
+        fromFormat.value = nextOption;
+    }
+}
+
+// Функция для проверки совпадений форматов
+function validateFromToFormats() {
+    const fromFormat = document.getElementById("fromFormat").value;
+    const toFormat = document.getElementById("toFormat").value;
+
+    if (fromFormat === toFormat) {
+        alert("Поля 'Из' и 'В' не должны совпадать. Пожалуйста, выберите разные форматы.");
+        return false;
+    }
+    return true;
+}
+
 function populateAnswerOptions() {
     const answerContainer = document.getElementById("answerOptions");
     answerContainer.innerHTML = "";
-    
+
+    // Получаем выбранные форматы "из" и "в"
+    const fromFormat = document.getElementById("fromFormat").value;
+    const toFormat = document.getElementById("toFormat").value;
+
+    // Получаем все возможные ответы
     let allAnswers;
-    if (selectedCategories.includes(testConfig[currentTest].getAllOption())) {
+    if (selectedCategories.includes(testConfig[currentTest].allOption)) {
         // Если выбрана категория "Все звуки" или "Все цифры", берем все ответы из словаря
-        allAnswers = getCurrentDictionaryData().map(q => testConfig[currentTest].getAnswer(q));
+        allAnswers = getCurrentDictionaryData().map(q => q[toFormat]); // Используем toFormat для ответов
     } else {
         // Иначе фильтруем ответы по выбранным категориям
         allAnswers = getCurrentDictionaryData()
             .filter(q => q.categories.some(c => selectedCategories.includes(c)))
-            .map(q => testConfig[currentTest].getAnswer(q));
+            .map(q => q[toFormat]); // Используем toFormat для ответов
     }
 
+    // Убираем дубликаты и перемешиваем
     let uniqueAnswers = [...new Set(allAnswers)];
-    let correctAnswer = testConfig[currentTest].getAnswer(question);
-    
+    let correctAnswer = question[toFormat]; // Правильный ответ
+
+    // Генерируем варианты ответов
     let options = uniqueAnswers.sort(() => Math.random() - 0.5).slice(0, 4);
     if (!options.includes(correctAnswer)) {
         options[Math.floor(Math.random() * options.length)] = correctAnswer;
     }
-    
+
+    // Создаём кнопки с вариантами ответов
     options.forEach(option => {
         const button = document.createElement("button");
         button.textContent = option;
@@ -202,19 +312,31 @@ function populateAnswerOptions() {
 function checkAnswer(answer) {
     const questionElement = document.getElementById("question");
     const questionText = questionElement.textContent;
-    const questionIndex = testConfig[currentTest].getEntryByQuestion(data[testConfig[currentTest].getDictionary()], questionText);
-    const question = data[testConfig[currentTest].getDictionary()][questionIndex];
-    const correctAnswer = testConfig[currentTest].getAnswer(question).toLowerCase(); // Приводим к нижнему регистру
-    const userAnswer = answer.trim().toLowerCase(); // Приводим к нижнему регистру
+
+    // Получаем выбранные форматы "из" и "в"
+    const fromFormat = document.getElementById("fromFormat").value;
+    const toFormat = document.getElementById("toFormat").value;
+
+    // Находим текущий вопрос в данных
+    const questionIndex = getCurrentDictionaryData().findIndex(q => q[fromFormat] === questionText);
+    if (questionIndex === -1) {
+        console.error("Вопрос не найден в данных.");
+        return;
+    }
+
+    const question = getCurrentDictionaryData()[questionIndex];
+    const correctAnswer = question[toFormat].toLowerCase(); // Правильный ответ
+    const userAnswer = answer.trim().toLowerCase(); // Ответ пользователя
+
     const optionButtons = document.querySelectorAll("#answerOptions button");
     const answerInput = document.getElementById("answerInput");
 
     if (mode === "closed") {
         optionButtons.forEach(button => {
-            if (button.textContent.toLowerCase() === correctAnswer) { // Игнорируем регистр
+            if (button.textContent.toLowerCase() === correctAnswer) {
                 button.style.backgroundColor = "rgba(255, 255, 128, .5)"; // Подсветить правильный ответ
             }
-            if (button.textContent.toLowerCase() === userAnswer) { // Игнорируем регистр
+            if (button.textContent.toLowerCase() === userAnswer) {
                 if (userAnswer === correctAnswer) {
                     correctCount++;
                     document.getElementById("status").textContent = "Правильно!";
@@ -228,7 +350,7 @@ function checkAnswer(answer) {
             button.disabled = true;
         });
     } else {
-        if (userAnswer === correctAnswer) { // Сравниваем с учетом нижнего регистра
+        if (userAnswer === correctAnswer) {
             correctCount++;
             document.getElementById("status").textContent = "Правильно!";
             answerInput.style.backgroundColor = "rgba(128, 255, 128, 0.5)"; // Зелёный
@@ -263,7 +385,7 @@ function updateScore() {
 }
 
 function resetQuestions() {
-    questions = testConfig[currentTest].filterQuestions(getCurrentDictionaryData(), selectedCategories);
+    questions = filterQuestions(getCurrentDictionaryData(), selectedCategories, currentTest);
 }
 
 document.getElementById("submitAnswer").addEventListener("click", () => {
@@ -286,7 +408,6 @@ function exitToTestSelection() {
     document.getElementById("testSelection").style.display = "block";
 }
 
-
 function endTest() {
     resetQuestions();
     document.getElementById("status").textContent = "";
@@ -295,7 +416,6 @@ function endTest() {
     document.getElementById("testSelection").style.display = "block";
 }
 
-
 function shuffle(array) {
     for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -303,28 +423,3 @@ function shuffle(array) {
     }
     return array;
 }
-
-// Автотест для проверки, что вопросы не повторяются подряд
-function autoTestNoConsecutiveRepeats() {
-    const iterations = 1000;
-    let previousQuestion = null;
-    let consecutiveRepeats = 0;
-
-    for (let i = 0; i < iterations; i++) {
-        loadQuestion();
-        const currentQuestion = document.getElementById("question").textContent;
-        
-        if (currentQuestion === previousQuestion) {
-            consecutiveRepeats++;
-            console.error(`Ошибка: Вопрос повторяется подряд (${currentQuestion})`);
-        }
-        
-        previousQuestion = currentQuestion;
-    }
-
-    if (consecutiveRepeats === 0) {
-        console.log("Тест пройден: Вопросы не повторяются подряд.");
-    } else {
-        console.error(`Тест провален: Повторений подряд - ${consecutiveRepeats}`);
-    }
-};
