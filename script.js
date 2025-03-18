@@ -365,6 +365,7 @@ document.getElementById("submitAnswer").addEventListener("click", () => {
 document.getElementById("endTest").addEventListener("click", function() {
     document.getElementById("testContainer").style.display = "none";
     document.getElementById("setupScreen").style.display = "block";
+    endTest();
 });
 
 function exitToTestSelection() {
