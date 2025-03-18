@@ -27,6 +27,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
 
+    // Инициализация Telegram WebApp
+    Telegram.WebApp.ready();
+
     focusOnInput();
 });
 
@@ -372,9 +375,21 @@ function exitToTestSelection() {
 function endTest() {
     resetQuestions();
     document.getElementById("status").textContent = "";
-    alert(`Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`);
-    document.getElementById("testContainer").style.display = "none";
-    document.getElementById("testSelection").style.display = "block";
+    const message = `Тест завершён! Правильных ответов: ${correctCount}, Неправильных ответов: ${incorrectCount}`;
+    alert(message);
+
+    // Подготавливаем данные для отправки
+    const results = {
+        correctAnswers: correctCount,
+        incorrectAnswers: incorrectCount,
+        testType: currentTest
+    };
+
+    // Отправляем данные в бота
+    Telegram.WebApp.sendData(JSON.stringify(results));
+
+    // Закрываем мини-приложение
+    Telegram.WebApp.close();
 }
 
 function shuffle(array) {
