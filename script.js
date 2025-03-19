@@ -388,9 +388,6 @@ function endTest() {
 
     // Отправляем данные в бота
     Telegram.WebApp.sendData(JSON.stringify(results));
-
-    // Закрываем мини-приложение
-    Telegram.WebApp.close();
 }
 
 function shuffle(array) {
