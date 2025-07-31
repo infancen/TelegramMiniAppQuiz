@@ -1,13 +1,25 @@
+:root {
+    --tg-bg-color: #f4f4f4;
+    --tg-text-color: #000000;
+    --tg-hint-color: #999999;
+    --tg-button-color: #2aabee;
+    --tg-button-text-color: #ffffff;
+    --tg-secondary-bg-color: #ffffff;
+    --tg-link-color: #267eb8;
+}
+
 body {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background-color: var(--tg-bg-color);
+    color: var(--tg-text-color);
     margin: 0;
     padding: 20px;
     max-width: 100vw;
     overflow-x: hidden;
 }
 
+/* Общие кнопки */
 button {
     padding: 10px 20px;
     margin: 5px;
@@ -17,12 +29,43 @@ button {
     display: block;
     margin-left: auto;
     margin-right: auto;
+
+    border: none;
+    border-radius: 10px;
+    background-color: var(--tg-button-color);
+    color: var(--tg-button-text-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-#testContainer, #setupScreen {
+button:hover {
+    filter: brightness(1.05);
+}
+
+button:active {
+    filter: brightness(0.9);
+}
+
+/* Контейнеры */
+#testContainer,
+#setupScreen,
+#testSelection {
     display: none;
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    background-color: var(--tg-secondary-bg-color);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
+/* Первичная секция видна по умолчанию */
+#testSelection {
+    display: block;
+}
+
+/* Варианты ответов */
 #options {
     margin-left: auto;
     margin-right: auto;
@@ -36,7 +79,9 @@ button {
     margin: 5px 0;
 }
 
-input, select {
+/* Inputs и selects */
+input,
+select {
     font-size: 16px;
     padding: 10px;
     width: 90%;
@@ -44,16 +89,21 @@ input, select {
     display: block;
     margin-left: auto;
     margin-right: auto;
+    border-radius: 8px;
+    border: 1px solid var(--tg-hint-color);
+    background-color: var(--tg-secondary-bg-color);
+    color: var(--tg-text-color);
 }
 
-/* Специфичный стиль для радио-кнопок */
+/* Радио-кнопки */
 input[type="radio"] {
     width: auto;
     margin: 0 10px 0 0;
     padding: 0;
+    accent-color: var(--tg-button-color);
 }
 
-/* Стили для радио-групп */
+/* Радио-группа */
 .radio-group {
     width: 100%;
     max-width: 300px;
@@ -64,44 +114,45 @@ input[type="radio"] {
 
 .radio-group label {
     display: flex;
-    align-items: center; /* Выравнивание радио-кнопки и текста по центру */
-    margin: 5px 0; /* Отступ между вариантами */
+    align-items: center;
+    margin: 5px 0;
     font-size: 16px;
 }
 
-/* Стиль для кнопки "Начать тест" */
-#setupScreen button[onclick="startTest()"] {
-    margin-top: 20px; /* Отступ сверху */
-}
-
-/* Стиль для кнопки "Выйти ко всем тестам" */
+/* Кнопка "Начать тест" */
+#setupScreen button[onclick="startTest()"],
 #setupScreen button[onclick="exitToTestSelection()"] {
-    margin-top: 20px; /* Отступ сверху */
+    margin-top: 20px;
 }
 
-/* Новые стили для выравнивания лейблов и выпадающих списков в разделе "Направление перевода" */
+/* Направление перевода */
 #setupScreen h2 {
-    margin-bottom: 10px; /* Отступ снизу для заголовка */
+    margin-bottom: 10px;
 }
 
-/* Стили для лейблов и выпадающих списков в разделе "Направление перевода" */
 #setupScreen #directionContainer label {
-    display: inline-block; /* Лейблы в одну строку с выпадающими списками */
-    width: 50px; /* Фиксированная ширина для лейблов */
-    text-align: left; /* Выравнивание текста лейблов по левому краю */
-    margin-right: 10px; /* Отступ между лейблом и выпадающим списком */
+    display: inline-block;
+    width: 50px;
+    text-align: left;
+    margin-right: 10px;
     font-size: 16px;
 }
 
 #setupScreen #directionContainer select {
-    width: calc(100% - 70px); /* Ширина выпадающего списка с учётом лейбла */
-    max-width: 250px; /* Максимальная ширина */
-    display: inline-block; /* Выпадающие списки в одну строку с лейблами */
-    margin: 5px 0; /* Отступы для выравнивания */
+    width: calc(100% - 70px);
+    max-width: 250px;
+    display: inline-block;
+    margin: 5px 0;
 }
 
-/* Контейнер для каждой пары "лейбл + выпадающий список" */
 #setupScreen #directionContainer .direction-group {
-    display: block; /* Каждая группа на отдельной строке */
-    margin-bottom: 10px; /* Отступ между группами */
+    display: block;
+    margin-bottom: 10px;
+}
+
+/* Статус */
+#status {
+    margin: 16px 0;
+    font-size: 16px;
+    font-weight: 500;
 }

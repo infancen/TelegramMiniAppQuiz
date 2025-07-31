@@ -31,6 +31,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     Telegram.WebApp.ready();
 
     focusOnInput();
+
+    applyTelegramTheme();
 });
 
 function focusOnInput() {
@@ -396,4 +398,21 @@ function shuffle(array) {
         [array[i], array[j]] = [array[j], array[i]];
     }
     return array;
+}
+
+function applyTelegramTheme() {
+    const tg = Telegram.WebApp;
+    const theme = tg.themeParams;
+    const root = document.documentElement;
+
+    root.style.setProperty('--tg-bg-color', theme.bg_color || '#f4f4f4');
+    root.style.setProperty('--tg-text-color', theme.text_color || '#000000');
+    root.style.setProperty('--tg-hint-color', theme.hint_color || '#999999');
+    root.style.setProperty('--tg-link-color', theme.link_color || '#267eb8');
+    root.style.setProperty('--tg-button-color', theme.button_color || '#2aabee');
+    root.style.setProperty('--tg-button-text-color', theme.button_text_color || '#ffffff');
+    root.style.setProperty('--tg-secondary-bg-color', theme.secondary_bg_color || '#ffffff');
+
+    document.body.style.backgroundColor = theme.bg_color || '#f4f4f4';
+    document.body.style.color = theme.text_color || '#000000';
 }
